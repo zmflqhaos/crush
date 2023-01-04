@@ -66,19 +66,19 @@ public class Bullet : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if(collision.transform.CompareTag("Bullet")&&isAttack)
+        if(collision.transform.CompareTag("Bullet"))
         {
             var target = collision.transform.GetComponent<Bullet>();
             var reflect = Vector2.Reflect(lastVelocity.normalized, collision.contacts[0].normal);
-            rigid.velocity = (reflect * power);
-            target.Hit(lastVelocity);
-            isAttack = false;
+            var reflect2 = (Vector2)collision.transform.position - (Vector2)transform.position;
+            reflect2 /= reflect2.magnitude;
+            rigid.velocity = (reflect * lastVelocity.magnitude/5);
+            target.Hit((reflect2 * lastVelocity.magnitude + lastVelocity)/2);
         }
     }
 
     public void Hit(Vector2 velo)
     {
         rigid.velocity = velo;
-        isAttack = true;
     }
 }
