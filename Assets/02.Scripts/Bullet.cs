@@ -20,8 +20,6 @@ public class Bullet : MonoBehaviour
 
     private Vector2 lastVelocity;
 
-    private bool isAttack = false;
-
     private void Start()
     {
         rigid = GetComponent<Rigidbody2D>();
@@ -34,8 +32,8 @@ public class Bullet : MonoBehaviour
 
     private void OnMouseDrag()
     {
-        power = Mathf.Clamp(Vector2.Distance(transform.position, Mouse.Instance.mousePosition) * 2, minDragPower, maxDragPower);
-        if (power < 1.5f)
+        power = Mathf.Clamp(Vector2.Distance(transform.position, Mouse.Instance.mousePosition) * 4, minDragPower, maxDragPower);
+        if (power <= minDragPower)
         {
             line.transform.localScale = defaultScale;
             return;
@@ -49,9 +47,8 @@ public class Bullet : MonoBehaviour
     private void OnMouseUp()
     {
         line.transform.localScale = defaultScale;
-        if (power < 1.5f) return;
+        if (power <= minDragPower) return;
 
-        isAttack = true;
         angle = transform.position - Mouse.Instance.mousePosition;
         angle /= angle.magnitude;
 
@@ -59,20 +56,23 @@ public class Bullet : MonoBehaviour
         rigid.velocity = (angle * (power * pushPower));
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         lastVelocity = rigid.velocity;
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if(collision.transform.CompareTag("Bullet"))
+        if (rigid.velocity.x == 0 || rigid.velocity.y == 0) return;
+        if (collision.transform.CompareTag("Bullet"))
         {
             var target = collision.transform.GetComponent<Bullet>();
             var reflect = Vector2.Reflect(lastVelocity.normalized, collision.contacts[0].normal);
             var reflect2 = (Vector2)collision.transform.position - (Vector2)transform.position;
             reflect2 /= reflect2.magnitude;
-            rigid.velocity = (reflect * lastVelocity.magnitude/5);
+            rigid.velocity = (reflect * (lastVelocity.magnitude / pushPower)/2);
+
+            if (rigid.velocity.x == 0 || rigid.velocity.y == 0) return;
             target.Hit((reflect2 * lastVelocity.magnitude + lastVelocity)/2);
         }
     }
@@ -80,5 +80,7 @@ public class Bullet : MonoBehaviour
     public void Hit(Vector2 velo)
     {
         rigid.velocity = velo;
+        velo = rigid.velocity;
+        Debug.Log(name + velo);
     }
 }
