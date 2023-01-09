@@ -1,16 +1,27 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class Bullet : MonoBehaviour
 {
+    public float HP { get; set; }
+    public float ATK { get; set; }
+
     [SerializeField] private float minDragPower;
     [SerializeField] private float maxDragPower;
     [SerializeField] private float pushPower;
 
+    public UnityEvent MouseUp;
+    public UnityEvent BeforeCrash;
+    public UnityEvent AfterCrash;
+    public UnityEvent BeforeAttack;
+    public UnityEvent AfterAttack;
+    public UnityEvent OnDie;
+
     private Vector2 defaultScale = new Vector2(0.5f, 0.5f);
     private GameObject line;
-    private Rigidbody2D rigid;
+    public Rigidbody2D rigid;
 
     private float dragAngle;
     private Vector2 dis;
@@ -18,16 +29,19 @@ public class Bullet : MonoBehaviour
     private float power;
     private Vector2 angle;
 
-    private Vector2 lastVelocity;
+    public Vector2 lastVelocity;
 
     private void Start()
     {
         rigid = GetComponent<Rigidbody2D>();
         line = transform.GetChild(0).gameObject;
+        HP = 100;
+        ATK = 35;
     }
 
     private void OnMouseDown()
     {
+        
     }
 
     private void OnMouseDrag()
@@ -49,10 +63,11 @@ public class Bullet : MonoBehaviour
         line.transform.localScale = defaultScale;
         if (power <= minDragPower) return;
 
+        MouseUp?.Invoke(); // 발사 직후 발동하는 트리거
+
         angle = transform.position - Mouse.Instance.mousePosition;
         angle /= angle.magnitude;
 
-        Debug.Log("Angle : " + angle + " Power : " + power);
         rigid.velocity = (angle * (power * pushPower));
     }
 
@@ -63,24 +78,36 @@ public class Bullet : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (rigid.velocity.x == 0 || rigid.velocity.y == 0) return;
         if (collision.transform.CompareTag("Bullet"))
         {
-            var target = collision.transform.GetComponent<Bullet>();
-            var reflect = Vector2.Reflect(lastVelocity.normalized, collision.contacts[0].normal);
-            var reflect2 = (Vector2)collision.transform.position - (Vector2)transform.position;
-            reflect2 /= reflect2.magnitude;
-            rigid.velocity = (reflect * (lastVelocity.magnitude / pushPower)/2);
-
-            if (rigid.velocity.x == 0 || rigid.velocity.y == 0) return;
-            target.Hit((reflect2 * lastVelocity.magnitude + lastVelocity)/2);
+            BeforeCrash?.Invoke(); //충돌 직전 발동하는 트리거
+            AM.Instance.CrashSet(this, collision.contacts[0].normal);
         }
+    }
+
+    public void AttackFinish()
+    {
+        Debug.Log(name + HP);
+        if (!DeadCheck())
+            AfterCrash?.Invoke(); //충돌 직후 발동하는 트리거
     }
 
     public void Hit(Vector2 velo)
     {
         rigid.velocity = velo;
-        velo = rigid.velocity;
-        Debug.Log(name + velo);
+    }
+
+    private bool DeadCheck()
+    {
+        if(HP<=0)
+        {
+            OnDie.Invoke();
+            Destroy(gameObject);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 }

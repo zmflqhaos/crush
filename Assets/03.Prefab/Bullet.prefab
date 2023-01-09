@@ -205,9 +205,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89f5f4175d57659419168873b731c4d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  HP: 100
+  ATK: 35
   minDragPower: 1.25
   maxDragPower: 6
   pushPower: 2
+  MouseUp:
+    m_PersistentCalls:
+      m_Calls: []
+  BeforeCrash:
+    m_PersistentCalls:
+      m_Calls: []
+  AfterCrash:
+    m_PersistentCalls:
+      m_Calls: []
+  BeforeAttack:
+    m_PersistentCalls:
+      m_Calls: []
+  AfterAttack:
+    m_PersistentCalls:
+      m_Calls: []
+  OnDie:
+    m_PersistentCalls:
+      m_Calls: []
+  rigid: {fileID: 0}
+  lastVelocity: {x: 0, y: 0}
 --- !u!58 &-5021712272542343328
 CircleCollider2D:
   m_ObjectHideFlags: 0
