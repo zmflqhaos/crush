@@ -15,10 +15,10 @@ public class PoolManager : MonoSingleton<PoolManager>
         GameObject poolObject;
         foreach (PoolItem pool in poolList)
         {
-            poolingList.Add(pool.name, pool.gameObject);
+            poolingList.Add(pool.name, pool.poolObject.gameObject);
             for(int i=0; i<pool.defaultCount; i++)
             {
-                poolObject = Instantiate(pool.gameObject);
+                poolObject = Instantiate(pool.poolObject.gameObject);
                 poolObject.name = pool.name;
                 poolObject.transform.SetParent(gameObject.transform);
                 poolObject.SetActive(false);
@@ -60,6 +60,6 @@ public class PoolManager : MonoSingleton<PoolManager>
 public class PoolItem
 {
     public string name;
-    public GameObject gameObject;
+    public PoolObject poolObject;
     public int defaultCount;
 }
